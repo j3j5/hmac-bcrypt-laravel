@@ -1,0 +1,21 @@
+{
+    "name": "j3j5/hmac-bcrypt-laravel",
+    "description": "A laravel hasher for the HMAC-BCrypt implementation for password hashing",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "j3j5\\HmacBcryptLaravel\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Julio Foulquie",
+            "email": "the.j3j5@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/hashing": "^9.0",
+        "illuminate/support": "^9.0"
+    }
+}
