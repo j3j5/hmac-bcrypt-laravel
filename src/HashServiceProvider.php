@@ -28,7 +28,7 @@ class HashServiceProvider extends ServiceProvider implements DeferrableProvider
     /**
      * Get the services provided by the provider.
      *
-     * @return array
+     * @return array<int, string>
      */
     public function provides()
     {
