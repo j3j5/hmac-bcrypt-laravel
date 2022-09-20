@@ -114,7 +114,8 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     public function make($value, array $options = [])
     {
-        $settings = sprintf('$%2s$%02d$%s',
+        $settings = sprintf(
+            '$%2s$%02d$%s',
             self::BCRYPT_ID,
             $this->cost($options),
             $this->salt($options)
@@ -240,7 +241,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
             throw new RuntimeException('Salt should be ' . self::BCRYPT_SALT_CHARS . ' chars long');
         }
 
-        $crypt_blowfish_alphabet = '/(?:[\.\/0-9A-Za-z]){' . self::BCRYPT_SALT_CHARS .'}/';
+        $crypt_blowfish_alphabet = '/(?:[\.\/0-9A-Za-z]){' . self::BCRYPT_SALT_CHARS . '}/';
         if (!preg_match($crypt_blowfish_alphabet, $salt)) {
             throw new RuntimeException('Invalid salt provided');
         }
