@@ -61,6 +61,11 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue(Hash::check($pass, $expected));
     }
 
+    public function test_hash_check_returns_false_for_empty_string()
+    {
+        $this->assertFalse(Hash::check('', ''));
+    }
+
     public function test_hash_needs_rehash_returns_false_if_no_changes()
     {
         $pass = Str::random();
@@ -111,6 +116,16 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectExceptionMessage('Invalid salt provided');
 
         $hash = Hash::make($pass, ['salt' => Str::repeat('*', 22)]);
+    }
+
+    public function test_hash_with_wrong_number_rounds_throws_exception()
+    {
+        $pass = Str::random();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid number of rounds');
+
+        $hash = Hash::make($pass, ['rounds' => 3]);
     }
 
     public function test_changing_pepper_on_runtime_changes_output()

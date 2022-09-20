@@ -137,6 +137,13 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         */
         $midHash = crypt($preHash, $settings);
 
+        // From phpdocs on crypt():
+        // Returns the hashed string or a string that is shorter than 13 characters
+        // and is guaranteed to differ from the salt on failure.
+        if (strlen($midHash) < 13) {
+            throw new RuntimeException('Invalid settings provided to crypt');
+        }
+
         // Post-hashing is employed largely to differentiate hmac-bcrypt hashes
         // from bcrypt hashes i.e., the lengths will differ -- but also to add an
         // extra layer of protection due to the pepper.
@@ -219,19 +226,34 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     /**
      * Extract the cost value from the options array.
      *
+     * The two digit cost parameter is the base-2 logarithm of the iteration
+     * count for the underlying Blowfish-based hashing algorithm and must be
+     * in range 04-31, values outside this range will cause crypt() to fail.
+     *
      * @param  array<string, string|int>  $options
      * @return int
+     * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
      */
     protected function cost(array $options = [])
     {
-        return $options['rounds'] ?? $this->rounds;
+        $rounds = $options['rounds'] ?? $this->rounds;
+
+        if ($rounds < 4 || $rounds > 31) {
+            throw new RuntimeException('Invalid number of rounds');
+        }
+
+        return $rounds;
     }
 
     /**
+     * Salt must be 22 characters from the alphabet "./0-9A-Za-z".
+     * Using characters outside of this range in the salt will cause crypt()
+     * to return a zero-length string.
      *
      * @param array<string, string|int> $options
      * @throws \RuntimeException
      * @return string
+     * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
      */
     protected function salt(array $options = [])
     {
