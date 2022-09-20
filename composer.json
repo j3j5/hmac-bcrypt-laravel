@@ -8,6 +8,11 @@
             "j3j5\\HmacBcryptLaravel\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "j3j5\\HmacBcryptLaravel\\Tests\\": "tests"
+        }
+    },
     "authors": [
         {
             "name": "Julio Foulquie",
@@ -17,5 +22,14 @@
     "require": {
         "illuminate/hashing": "^9.0",
         "illuminate/support": "^9.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.7",
+        "phpunit/phpunit": "^9.5"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ]
     }
 }
