@@ -85,7 +85,15 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue(Hash::needsRehash($hash));
     }
 
-    public function test_hash_with_wrong_custom_salt_throws_exception()
+    public function test_hash_needs_rehash_returns_true_for_different_algo_same_id()
+    {
+        $pass = Str::random();
+        $hash = crypt($pass, '$2a$07$usesomesillystringfors');
+
+        $this->assertTrue(Hash::needsRehash($hash));
+    }
+
+    public function test_hash_with_wrong_length_custom_salt_throws_exception()
     {
         $pass = Str::random();
 
@@ -93,5 +101,56 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectExceptionMessage('Salt should be ' . HmacBcryptHasher::BCRYPT_SALT_CHARS . ' chars long');
 
         $hash = Hash::make($pass, ['salt' => 'sweetsalt']);
+    }
+
+    public function test_hash_with_wrong_alphabet_throws_exception()
+    {
+        $pass = Str::random();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid salt provided');
+
+        $hash = Hash::make($pass, ['salt' => Str::repeat('*', 22)]);
+    }
+
+    public function test_changing_pepper_on_runtime_changes_output()
+    {
+        /** @var \j3j5\HmacBcryptLaravel\HashManager */
+        $manager = $this->app['hash'];
+        /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $hasher */
+        $hasher = $manager->driver();
+        $pass = Str::random();
+        $hashDefaultPepper = $hasher->make($pass);
+        $hashRedPepper = $hasher->setPepper('red-pepper')->make($pass);
+
+        /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $defaultHasher */
+        $defaultHasher = $manager->createHmacBcryptDriver(); // Create a new default driver
+
+        // default driver works for normal hash, fails with red-peppered one
+        $this->assertTrue($defaultHasher->check($pass, $hashDefaultPepper));
+        $this->assertFalse($defaultHasher->check($pass, $hashRedPepper));
+
+        // red-pepper driver fails for normal hash, works with red-peppered one
+        $this->assertFalse($hasher->check($pass, $hashDefaultPepper));
+        $this->assertTrue($hasher->check($pass, $hashRedPepper));
+    }
+
+    public function test_changing_rounds_on_runtime_changes_output()
+    {
+        /** @var \j3j5\HmacBcryptLaravel\HashManager */
+        $manager = $this->app['hash'];
+        /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $hasher */
+        $hasher = $manager->driver();
+        $pass = Str::random();
+        $hashDefaultPepper = $hasher->make($pass);
+        $hashRedPepper = $hasher->setRounds(5)->make($pass);
+
+        /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $defaultHasher */
+        $defaultHasher = $manager->createHmacBcryptDriver();
+        $this->assertTrue($defaultHasher->check($pass, $hashDefaultPepper));
+        $this->assertFalse($defaultHasher->check($pass, $hashRedPepper));
+
+        $this->assertFalse($hasher->check($pass, $hashDefaultPepper));
+        $this->assertTrue($hasher->check($pass, $hashRedPepper));
     }
 }
