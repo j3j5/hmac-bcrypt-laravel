@@ -9,7 +9,6 @@ use RuntimeException;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
-
     /**
      * Get package providers.
      *
@@ -23,7 +22,6 @@ class TestCase extends \Orchestra\Testbench\TestCase
             'j3j5\HmacBcryptLaravel\HashServiceProvider',
         ];
     }
-
 
     /**
      * Setup the test environment.
@@ -95,6 +93,5 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectExceptionMessage('Salt should be ' . HmacBcryptHasher::BCRYPT_SALT_CHARS . ' chars long');
 
         $hash = Hash::make($pass, ['salt' => 'sweetsalt']);
-
     }
 }
