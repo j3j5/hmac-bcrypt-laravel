@@ -29,6 +29,15 @@
         "nunomaduro/larastan": "^2.2"
     },
     "scripts": {
+        "phpstan": [
+            "@php vendor/bin/phpstan"
+        ],
+        "phpunit": [
+            "@php vendor/bin/phpunit"
+        ],
+        "phpunit-coverage": [
+            "@php -d xdebug.mode=coverage vendor/bin/phpunit"
+        ],
         "post-autoload-dump": [
             "@php ./vendor/bin/testbench package:discover --ansi"
         ]
