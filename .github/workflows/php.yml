@@ -32,11 +32,49 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+    - name: Run phpstan
+      id: PHPStan
+      run: composer run-script phpstan
 
     - name: Run test suite
-      run: composer run-script phpunit-coverage
-      
-    - name: Run phpstan
-      run: composer run-script phpstan
+      id: PHPUnit
+      run: composer run-script phpunit-cov -- --coverage-clover=coverage.xml
+
+    - name: Check test coverage
+      uses: johanvanhelden/gha-clover-test-coverage-check@v1
+      id: coverage
+      with:
+        percentage: "90"
+        filename: "coverage.xml"
+
+    # Use the output from the `coverage` step
+    - name: Generate the badge SVG image
+      uses: emibcn/badge-action@v1
+      id: badge
+      with:
+        label: 'Coverage'
+        status: ${{ steps.coverage.outputs.coverage-rounded-display }}
+        path: ./test-coverage.svg
+        color: ${{
+              steps.coverage.outputs.coverage > 90 && 'green'              ||
+              steps.coverage.outputs.coverage > 80 && 'yellow,green'       ||
+              steps.coverage.outputs.coverage > 70 && 'yellow'             ||
+              steps.coverage.outputs.coverage > 60 && 'orange,yellow'      ||
+              steps.coverage.outputs.coverage > 50 && 'orange'             ||
+              steps.coverage.outputs.coverage > 40 && 'red,orange'         ||
+              steps.coverage.outputs.coverage > 30 && 'red,red,orange'     ||
+              steps.coverage.outputs.coverage > 20 && 'red,red,red,orange' ||
+              'red' }}
+    - name: Update gist
+      uses: sergeysova/jq-action@v2
+      id: gist
+      with:
+        cmd: |
+          jq --null-input '{description: $description, public: true, files:{"badge.svg": {content: $file}}}' \
+          --arg description "Badge from coverage testing" \
+          --rawfile file test-coverage.svg | curl \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GIST_API_TOKEN }}" \
+          https://api.github.com/gists/a143261dcd5d0d9456c01f854eccecd0 \
+          --data @-
