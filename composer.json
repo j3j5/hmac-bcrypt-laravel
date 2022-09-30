@@ -35,8 +35,8 @@
         "phpunit": [
             "@php vendor/bin/phpunit"
         ],
-        "phpunit-coverage": [
-            "@php -d xdebug.mode=coverage vendor/bin/phpunit"
+        "phpunit-cov": [
+            "@php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-text"
         ],
         "post-autoload-dump": [
             "@php ./vendor/bin/testbench package:discover --ansi"
