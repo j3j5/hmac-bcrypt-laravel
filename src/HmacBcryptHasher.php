@@ -44,7 +44,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     /**
      * Create a new hasher instance.
      *
-     * @param  array<string, string|int>  $options
+     * @param array{rounds?: int, pepper?: string} $options
      * @return void
      */
     public function __construct(array $options = [])
@@ -66,8 +66,10 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     public function info($hashedValue)
     {
         // Try first the parent
+        /** @var array{algo:null|int|string, algoName:string, options:array{cost?:int, salt?: string, memory_cost?: int, time_cost?: int, threads?: int}} $info */
         $info = parent::info($hashedValue);
-        // password_get_info() returns 0 or null for algo for unknown hashes
+        // parent::info() - that is, password_get_info(), returns 0 or null for
+        // algo for unknown hashes
         if ($info['algo'] !== null && $info['algo'] !== 0) {
             return $info;
         }
@@ -97,7 +99,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         $info['algo'] = self::BCRYPT_ID;
         $info['algoName'] = self::ALGO_NAME;
         if (isset($settings[2]) && is_numeric($settings[2])) {
-            $info['options']['cost'] = $settings[2];
+            $info['options']['cost'] =  (int) $settings[2];
         }
 
         return $info;
@@ -107,7 +109,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * Hash the given value.
      *
      * @param  string  $value
-     * @param  array<string, string|int>  $options
+     * @param  array{rounds?: int, salt?: string, pepper?: string} $options
      * @throws \RuntimeException
      * @return string
      *
@@ -159,7 +161,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      *
      * @param  string  $value
      * @param  string  $hashedValue
-     * @param  array<string, string|int>  $options
+     * @param  array{rounds?: int, salt?: string, pepper?: string} $options
      * @throws \RuntimeException
      * @return bool
      *
@@ -170,7 +172,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
             return false;
         }
 
-        // Retrieve salt from the hashedValue
+        // Retrieve options from the hashedValue
         [, , $rounds, $salt] = explode('$', $hashedValue);
         $salt = substr($salt, 0, self::BCRYPT_SALT_CHARS);
 
@@ -188,7 +190,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * Check if the given hash has been hashed using the given options.
      *
      * @param  string  $hashedValue
-     * @param  array<string, string|int>  $options
+     * @param  array{rounds?: int, salt?: string, pepper?: string} $options  $options
      * @return bool
      */
     public function needsRehash($hashedValue, array $options = [])
@@ -204,7 +206,8 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         if ($algoName !== self::ALGO_NAME) {
             return true;
         }
-
+        // info() returns the rounds on the key 'cost' to keep compatibility with
+        // the format used by password_get_info()
         $hashCost = $info['options']['cost'] ?? -1;
 
         return $hashCost !== $this->cost($options);
@@ -237,12 +240,11 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     protected function cost(array $options = [])
     {
         $rounds = $options['rounds'] ?? $this->rounds;
-
         if ($rounds < 4 || $rounds > 31) {
             throw new RuntimeException('Invalid number of rounds');
         }
 
-        return $rounds;
+        return (int) $rounds;
     }
 
     /**
@@ -250,7 +252,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * Using characters outside of this range in the salt will cause crypt()
      * to return a zero-length string.
      *
-     * @param array<string, string|int> $options
+     * @param array{salt?: string} $options
      * @throws \RuntimeException
      * @return string
      * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
@@ -280,7 +282,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
 
     /**
      *
-     * @param array<string, string|int> $options
+     * @param array{pepper?: string} $options
      * @return mixed
      */
     protected function pepper(array $options = [])
