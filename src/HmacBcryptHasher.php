@@ -170,14 +170,14 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
             return false;
         }
 
-        // Add options from the hashed value
-        [, , $cost, $salt] = explode('$', $hashedValue);
+        // Retrieve salt from the hashedValue
+        [, , $rounds, $salt] = explode('$', $hashedValue);
         $salt = substr($salt, 0, self::BCRYPT_SALT_CHARS);
-        $options = array_merge($options, [
-            'cost' => $cost,
-            'salt' => $salt,
-        ]);
 
+        $options = array_merge($options, [
+            'salt' => $salt,
+            'rounds' => (int) $rounds,
+        ]);
         return hash_equals(
             $this->make($value, $options),
             $hashedValue
