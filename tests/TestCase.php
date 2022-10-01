@@ -150,22 +150,35 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue($hasher->check($pass, $hashRedPepper));
     }
 
-    public function test_changing_rounds_on_runtime_changes_output()
+    public function test_changing_rounds_on_runtime_changes_output_but_still_validates()
     {
         /** @var \j3j5\HmacBcryptLaravel\HashManager */
         $manager = $this->app['hash'];
         /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $hasher */
         $hasher = $manager->driver();
         $pass = Str::random();
-        $hashDefaultPepper = $hasher->make($pass);
-        $hashRedPepper = $hasher->setRounds(5)->make($pass);
+        $defaultRounds = $this->app['config']->get('hashing.hmac-bcrypt.rounds');
 
+        $hashDefaultRounds = $hasher->make($pass);
+        $hashDifferentRounds = $hasher->setRounds($defaultRounds - 1)->make($pass);
+
+        $this->assertNotEmpty($hashDefaultRounds, $hashDifferentRounds);
+
+        [, , $outputCostDefault,] = explode('$', $hashDefaultRounds);
+        $this->assertEquals($defaultRounds, $outputCostDefault);
+
+        [, , $outputCostDifferent,] = explode('$', $hashDifferentRounds);
+        $this->assertEquals($defaultRounds - 1, $outputCostDifferent);
+
+        // No matter what cost (rounds) is defined on the hasher, the check function
+        // should work just the same
         /** @var \j3j5\HmacBcryptLaravel\HmacBcryptHasher $defaultHasher */
         $defaultHasher = $manager->createHmacBcryptDriver();
-        $this->assertTrue($defaultHasher->check($pass, $hashDefaultPepper));
-        $this->assertFalse($defaultHasher->check($pass, $hashRedPepper));
+        $this->assertTrue($defaultHasher->check($pass, $hashDefaultRounds));
+        $this->assertTrue($defaultHasher->check($pass, $hashDifferentRounds));
 
-        $this->assertFalse($hasher->check($pass, $hashDefaultPepper));
-        $this->assertTrue($hasher->check($pass, $hashRedPepper));
+        $this->assertTrue($hasher->check($pass, $hashDefaultRounds));
+        $this->assertTrue($hasher->check($pass, $hashDifferentRounds));
     }
+
 }
