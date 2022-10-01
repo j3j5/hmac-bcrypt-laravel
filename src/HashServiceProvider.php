@@ -4,6 +4,7 @@ namespace j3j5\HmacBcryptLaravel;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class HashServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -22,7 +23,11 @@ class HashServiceProvider extends ServiceProvider implements DeferrableProvider
             return $app['hash']->driver();
         });
 
-        $this->mergeConfigFrom(realpath(__DIR__ . '/../config/hashing.php'), 'hashing');
+        $configPath = realpath(__DIR__ . '/../config/hashing.php');
+        if ($configPath === false) {
+            throw new RuntimeException('Hashing config file could not be found on hmac-bcrypt package');
+        }
+        $this->mergeConfigFrom($configPath, 'hashing');
     }
 
     /**
