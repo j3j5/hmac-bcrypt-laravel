@@ -50,7 +50,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     public function __construct(array $options = [])
     {
         $this->rounds = $options['rounds'] ?? $this->rounds;
-        $this->salt = $options['salt'] ?? Radix64::encode(
+        $this->salt = Radix64::encode(
             random_bytes(self::BCRYPT_SALT_BYTES)
         );
 
