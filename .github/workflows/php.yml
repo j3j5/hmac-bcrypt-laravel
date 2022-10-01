@@ -53,6 +53,7 @@ jobs:
       id: badge
       with:
         label: 'Coverage'
+        icon: 'https://www.php.net/images/logos/php-logo.svg'
         status: ${{ steps.coverage.outputs.coverage-rounded-display }}
         path: ./test-coverage.svg
         color: ${{
