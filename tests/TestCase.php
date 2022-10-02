@@ -180,5 +180,4 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue($hasher->check($pass, $hashDefaultRounds));
         $this->assertTrue($hasher->check($pass, $hashDifferentRounds));
     }
-
 }

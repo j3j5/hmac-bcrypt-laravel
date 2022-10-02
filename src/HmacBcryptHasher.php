@@ -99,7 +99,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         $info['algo'] = self::BCRYPT_ID;
         $info['algoName'] = self::ALGO_NAME;
         if (isset($settings[2]) && is_numeric($settings[2])) {
-            $info['options']['cost'] =  (int) $settings[2];
+            $info['options']['cost'] = (int) $settings[2];
         }
 
         return $info;
@@ -283,7 +283,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     /**
      *
      * @param array{pepper?: string} $options
-     * @return mixed
+     * @return string
      */
     protected function pepper(array $options = [])
     {

@@ -14,6 +14,10 @@ class HashManager extends Manager implements Hasher
      */
     public function createHmacBcryptDriver()
     {
-        return new HmacBcryptHasher($this->config->get('hashing.hmac-bcrypt') ?? []);
+        $options = $this->config->get('hashing.hmac-bcrypt');
+        if (!is_array($options)) {
+            $options = [];
+        }
+        return new HmacBcryptHasher($options);
     }
 }
