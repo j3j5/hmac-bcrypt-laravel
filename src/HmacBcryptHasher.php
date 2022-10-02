@@ -249,8 +249,8 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * count for the underlying Blowfish-based hashing algorithm and must be
      * in range 04-31, values outside this range will cause crypt() to fail.
      *
-     * @param  array<string, string|int>  $options
-     * @return int
+     * @param  array{rounds?: int}  $options
+     * @return int<4, 31>
      * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
      */
     protected function cost(array $options = [])
