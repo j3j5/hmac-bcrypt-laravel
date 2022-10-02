@@ -1,6 +1,6 @@
 # hmac-bcrypt
 
-![Coverage Badge](https://gist.githubusercontent.com/j3j5/a143261dcd5d0d9456c01f854eccecd0/raw/2a4743a13df8e3111ffcf86738e1a4363a4f0650/badge.svg "PHPUnit coverage")
+![Coverage Badge](https://gist.githubusercontent.com/j3j5/a143261dcd5d0d9456c01f854eccecd0/raw/badge.svg "PHPUnit coverage")
 ![PHPStan Badge, it reads "level 9"](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg?style=flat&logo=php "PHPStan Level 9")
 ![Build status for "main" branch](https://github.com/j3j5/hmac-bcrypt-laravel//actions/workflows/php.yml/badge.svg?branch=main "Build status")
 
