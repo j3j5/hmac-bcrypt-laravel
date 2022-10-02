@@ -184,10 +184,6 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
             return parent::check($value, $hashedValue, $options);
         }
 
-        if (strlen($hashedValue) === 0) {
-            return false;
-        }
-
         // Retrieve options from the hashedValue
         [, , $rounds, $salt] = explode('$', $hashedValue);
         $salt = substr($salt, 0, self::BCRYPT_SALT_CHARS);
