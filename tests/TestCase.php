@@ -180,4 +180,13 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue($hasher->check($pass, $hashDefaultRounds));
         $this->assertTrue($hasher->check($pass, $hashDifferentRounds));
     }
+
+    public function test_empty_config_uses_valid_default_options()
+    {
+        $this->app['config']->set('hashing.hmac-bcrypt', null);
+        $pass = Str::random();
+        $hash = Hash::make($pass);
+
+        $this->assertTrue(Hash::check($pass, $hash));
+    }
 }
