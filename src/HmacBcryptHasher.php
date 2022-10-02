@@ -8,7 +8,6 @@ use RuntimeException;
 
 class HmacBcryptHasher extends AbstractHasher implements HasherContract
 {
-    protected const ALGO_NAME = 'hmacbcrypt';
     protected const BCRYPT_ID = '2a';
     protected const BCRYPT_SALT_BYTES = 16;
 
@@ -20,7 +19,15 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     public const BCRYPT_SALT_CHARS = 22;
 
+    public const ALGO_NAME = 'hmacbcrypt';
     public const HMAC_HASH_ALGO = 'SHA512';
+
+    /**
+     * Indicates whether to perform an algorithm check.
+     *
+     * @var bool
+     */
+    protected $verifyAlgorithm = false;
 
     /**
      * The default cost factor.
@@ -44,11 +51,12 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     /**
      * Create a new hasher instance.
      *
-     * @param array{rounds?: int, pepper?: string} $options
+     * @param array{rounds?: int, pepper?: string, verify?: bool} $options
      * @return void
      */
     public function __construct(array $options = [])
     {
+        $this->verifyAlgorithm = $options['verify'] ?? $this->verifyAlgorithm;
         $this->rounds = $options['rounds'] ?? $this->rounds;
         $this->salt = Radix64::encode(
             random_bytes(self::BCRYPT_SALT_BYTES)
@@ -168,6 +176,14 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     public function check($value, $hashedValue, array $options = [])
     {
+        $algoName = $this->info($hashedValue)['algoName'];
+        if ($algoName !== self::ALGO_NAME) {
+            if ($this->verifyAlgorithm) {
+                throw new RuntimeException('This password does not use the HMAC-Bcrypt algorithm.');
+            }
+            return parent::check($value, $hashedValue, $options);
+        }
+
         if (strlen($hashedValue) === 0) {
             return false;
         }
