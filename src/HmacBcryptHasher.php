@@ -231,7 +231,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param  int  $rounds
      * @return $this
      */
-    public function setRounds($rounds)
+    public function setRounds(int $rounds) : self
     {
         $this->rounds = (int) $rounds;
 
@@ -249,7 +249,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @return int<4, 31>
      * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
      */
-    protected function cost(array $options = [])
+    protected function cost(array $options = []) : int
     {
         $rounds = $options['rounds'] ?? $this->rounds;
         if ($rounds < 4 || $rounds > 31) {
@@ -269,7 +269,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @return string
      * @see CRYPT_BLOWFISH @ https://www.php.net/manual/en/function.crypt.php
      */
-    protected function salt(array $options = [])
+    protected function salt(array $options = []) : string
     {
         $salt = $options['salt'] ?? $this->salt;
 
@@ -285,7 +285,12 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         return $salt;
     }
 
-    public function setPepper(string $pepper): self
+    /**
+     *
+     * @param string $pepper
+     * @return $this
+     */
+    public function setPepper(string $pepper) : self
     {
         $this->pepper = $pepper;
 
@@ -297,7 +302,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param array{pepper?: string} $options
      * @return string
      */
-    protected function pepper(array $options = [])
+    protected function pepper(array $options = []) : string
     {
         return $options['pepper'] ?? $this->pepper;
     }
