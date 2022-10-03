@@ -244,6 +244,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     public function test_empty_config_uses_valid_default_options()
     {
         $this->app['config']->set('hashing.hmac-bcrypt', null);
+        $this->app['config']->set('hashing.hmac-bcrypt.pepper', Str::random());
         $pass = Str::random();
         $hash = Hash::make($pass);
 
@@ -268,5 +269,27 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
         $infoInvalid = Hash::info('$2y$07$usesomesillystringfors');
         $this->assertSame('unknown', $infoInvalid['algoName']);
+    }
+
+    public function test_the_hasher_does_not_work_without_pepper()
+    {
+        $this->app['config']->set('hashing.hmac-bcrypt.pepper', '');
+        $pass = Str::random();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("HMAC-Bcrypt can't work without pepper and is currently empty.");
+
+        Hash::make($pass);
+    }
+
+    public function test_the_hasher_does_not_let_you_set_empty_pepper()
+    {
+        $driver = $this->app['hash.driver'];
+        $pass = Str::random();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("HMAC-Bcrypt can't work without pepper.");
+
+        $driver->setPepper('');
     }
 }

@@ -63,6 +63,9 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         );
 
         $this->pepper = $options['pepper'] ?? '';
+        if ($this->pepper === '' || !is_string($this->pepper)) {
+            throw new RuntimeException("HMAC-Bcrypt can't work without pepper and is currently empty.");
+        }
     }
 
     /**
@@ -292,6 +295,10 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     public function setPepper(string $pepper) : self
     {
+        if ($pepper === '') {
+            throw new RuntimeException("HMAC-Bcrypt can't work without pepper.");
+        }
+
         $this->pepper = $pepper;
 
         return $this;

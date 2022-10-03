@@ -3,7 +3,7 @@
 return [
 
     'hmac-bcrypt' => [
-        'pepper' => env('HMAC_BCRYPT_PEPPER', 'hmac_bcrypts'),
+        'pepper' => env('HMAC_BCRYPT_PEPPER'),
         'rounds' => env('HMAC_BCRYPT_ROUNDS', 13),
     ],
 ];
