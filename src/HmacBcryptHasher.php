@@ -19,7 +19,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     public const BCRYPT_SALT_CHARS = 22;
 
-    public const ALGO_NAME = 'hmacbcrypt';
+    public const ALGO_NAME = 'hmac-bcrypt';
     public const HMAC_HASH_ALGO = 'SHA512';
 
     /**
