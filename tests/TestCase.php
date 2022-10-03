@@ -164,7 +164,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Salt should be ' . HmacBcryptHasher::BCRYPT_SALT_CHARS . ' chars long');
 
-        $hash = Hash::make($pass, ['salt' => 'sweetsalt']);
+        Hash::make($pass, ['salt' => 'sweetsalt']);
     }
 
     public function test_hash_with_wrong_alphabet_throws_exception()
@@ -174,7 +174,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid salt provided');
 
-        $hash = Hash::make($pass, ['salt' => Str::repeat('*', 22)]);
+        Hash::make($pass, ['salt' => Str::repeat('*', 22)]);
     }
 
     public function test_hash_with_wrong_number_rounds_throws_exception()
@@ -184,8 +184,8 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid number of rounds');
 
-        $hash = Hash::make($pass, ['rounds' => 3]);
-        $hash = Hash::make($pass, ['rounds' => 32]);
+        Hash::make($pass, ['rounds' => 3]);
+        Hash::make($pass, ['rounds' => 32]);
     }
 
     public function test_changing_pepper_on_runtime_changes_output()
@@ -239,16 +239,6 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->assertTrue($hasher->check($pass, $hashDefaultRounds));
         $this->assertTrue($hasher->check($pass, $hashDifferentRounds));
-    }
-
-    public function test_empty_config_uses_valid_default_options()
-    {
-        $this->app['config']->set('hashing.hmac-bcrypt', null);
-        $this->app['config']->set('hashing.hmac-bcrypt.pepper', Str::random());
-        $pass = Str::random();
-        $hash = Hash::make($pass);
-
-        $this->assertTrue(Hash::check($pass, $hash));
     }
 
     public function test_info_function_works_for_different_inputs()
