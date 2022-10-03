@@ -28,6 +28,17 @@
         "phpunit/phpunit": "^9.5",
         "nunomaduro/larastan": "^2.2"
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "j3j5\\HmacBcryptLaravel\\HashServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
     "scripts": {
         "phpstan": [
             "@php vendor/bin/phpstan"
