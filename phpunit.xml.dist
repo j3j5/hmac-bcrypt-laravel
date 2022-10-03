@@ -7,13 +7,9 @@
   </coverage>
   <testsuites>
     <testsuite name="Kassa Test Suite">
-        <directory suffix="Case.php">./tests/</directory>
+      <directory suffix="Case.php">./tests/</directory>
     </testsuite>
   </testsuites>
-  <!-- <logging> -->
-  <!-- <log type="coverage-clover" target="_reports/logs/clover.xml"/> -->
-  <!-- <log type="coverage-html" target="_reports/coverage"/> -->
-  <!-- </logging> -->
   <php>
     <env name="APP_ENV" value="testing"/>
     <env name="CACHE_DRIVER" value="array"/>
