@@ -137,7 +137,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $hash = Hash::make($pass);
 
         $this->assertTrue(Hash::needsRehash($hash, [
-            'rounds' => $this->app['config']->get('hashing.hmac-bcrypt.rounds') + 1
+            'rounds' => $this->app['config']->get('hashing.hmac-bcrypt.rounds') + 1,
         ]));
     }
 
