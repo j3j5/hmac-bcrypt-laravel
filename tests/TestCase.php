@@ -101,16 +101,16 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
     public function test_hashing_passwords_longer_than_bcrypt_limit_works()
     {
-        // BCrypt cuts passwords longer than 72
+        // // BCrypt cuts passwords longer than 72
         $pass1 = Str::random(75);
         $pass2 = substr($pass1, 0, strlen($pass1) - 3) . Str::random(3);
-        $hash1 = app('hash')->driver('bcrypt')->make($pass1);
-        $hash2 = app('hash')->driver('bcrypt')->make($pass2);
-        $this->assertTrue(app('hash')->driver('bcrypt')->check($pass1, $hash1));
-        $this->assertTrue(app('hash')->driver('bcrypt')->check($pass2, $hash2));
-        // Bcrypt will validate pass1 with hash2 and viceversa
-        $this->assertTrue(app('hash')->driver('bcrypt')->check($pass1, $hash2));
-        $this->assertTrue(app('hash')->driver('bcrypt')->check($pass2, $hash1));
+        // $hash1 = app('hash')->driver('bcrypt')->make($pass1);
+        // $hash2 = app('hash')->driver('bcrypt')->make($pass2);
+        // $this->assertTrue(app('hash')->driver('bcrypt')->check($pass1, $hash1));
+        // $this->assertTrue(app('hash')->driver('bcrypt')->check($pass2, $hash2));
+        // // Bcrypt will validate pass1 with hash2 and viceversa
+        // $this->assertTrue(app('hash')->driver('bcrypt')->check($pass1, $hash2));
+        // $this->assertTrue(app('hash')->driver('bcrypt')->check($pass2, $hash1));
 
         // Now let's try with HMAC-Bcrypt
         $hash1 = Hash::make($pass1);
@@ -168,27 +168,23 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue(Hash::needsRehash($hash));
     }
 
-    public function test_hash_with_wrong_length_custom_salt_throws_exception()
-    {
-        $pass = Str::random();
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Salt should be ' . HmacBcryptHasher::BCRYPT_SALT_CHARS . ' chars long');
-
-        Hash::make($pass, ['salt' => 'sweetsalt']);
-    }
-
     public function test_hash_with_wrong_alphabet_throws_exception()
     {
         $pass = Str::random();
+        $hash = Hash::make($pass);
+
+        [, , , $actualHash] = explode('$', $hash);
+        $salt = substr($actualHash, 0, HmacBcryptHasher::BCRYPT_SALT_CHARS);
+
+        $badHash = str_replace($salt, Str::repeat('*', HmacBcryptHasher::BCRYPT_SALT_CHARS), $hash);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid salt provided');
 
-        Hash::make($pass, ['salt' => Str::repeat('*', 22)]);
+        Hash::check($pass, $badHash);
     }
 
-    public function test_hash_with_wrong_number_rounds_throws_exception()
+    public function test_hash_with_little_number_rounds_throws_exception()
     {
         $pass = Str::random();
 
@@ -196,6 +192,15 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->expectExceptionMessage('Invalid number of rounds');
 
         Hash::make($pass, ['rounds' => 3]);
+    }
+
+    public function test_hash_with_too_many_rounds_throws_exception()
+    {
+        $pass = Str::random();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid number of rounds');
+
         Hash::make($pass, ['rounds' => 32]);
     }
 
