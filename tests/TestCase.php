@@ -61,6 +61,17 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->assertTrue(Hash::check($pass, $hash));
     }
 
+    public function test_hasher_generates_different_salt_on_every_run()
+    {
+        $pass = Str::random();
+        $hash1 = Hash::make($pass);
+        $hash2 = Hash::make($pass);
+
+        $this->assertNotSame($hash1, $hash2);
+        $this->assertTrue(Hash::check($pass, $hash1));
+        $this->assertTrue(Hash::check($pass, $hash2));
+    }
+
     public function test_hash_check_returns_false_for_empty_string_hash()
     {
         $hashEmptyPass = Hash::make('');
@@ -275,11 +286,18 @@ class TestCase extends \Orchestra\Testbench\TestCase
     public function test_the_hasher_does_not_let_you_set_empty_pepper()
     {
         $driver = $this->app['hash.driver'];
-        $pass = Str::random();
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage("HMAC-Bcrypt can't work without pepper.");
 
         $driver->setPepper('');
+    }
+
+    public function test_passing_salt_as_option_gets_ignored()
+    {
+        $pass = Str::random();
+        $salt = 'pinksalt';
+        $hash = Hash::make($pass, ['salt' => $salt]);
+        $this->assertFalse(strpos($hash, $salt));
     }
 }

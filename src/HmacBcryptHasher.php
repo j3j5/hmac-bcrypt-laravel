@@ -37,12 +37,6 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     protected $rounds = 13;
 
     /**
-     * The salt to be applied on the bcrypt step
-     * @var string
-     */
-    protected $salt;
-
-    /**
      * The pepper to be applied on the hmac steps
      * @var string
      */
@@ -58,9 +52,6 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     {
         $this->verifyAlgorithm = $options['verify'] ?? $this->verifyAlgorithm;
         $this->rounds = $options['rounds'] ?? $this->rounds;
-        $this->salt = Radix64::encode(
-            random_bytes(self::BCRYPT_SALT_BYTES)
-        );
 
         $this->pepper = $options['pepper'] ?? '';
         if ($this->pepper === '' || !is_string($this->pepper)) {
@@ -120,12 +111,30 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * Hash the given value.
      *
      * @param  string  $value
-     * @param  array{rounds?: int, salt?: string, pepper?: string} $options
+     * @param  array{rounds?: int, pepper?: string} $options
      * @throws \RuntimeException
      * @return string
      *
      */
     public function make($value, array $options = [])
+    {
+        // Make sure no salt is passed ever on make()
+        // Ignore phpstan error so it's not documented that salt could be passed
+        unset($options['salt']);    /** @phpstan-ignore-line */
+
+        return $this->hash($value, $options);
+    }
+
+    /**
+     * Hash the given value.
+     *
+     * @param  string  $value
+     * @param  array{rounds?: int, salt?: string, pepper?: string} $options
+     * @throws \RuntimeException
+     * @return string
+     *
+     */
+    private function hash($value, array $options = [])
     {
         $settings = sprintf(
             '$%2s$%02d$%s',
@@ -188,15 +197,16 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         }
 
         // Retrieve options from the hashedValue
-        [, , $rounds, $salt] = explode('$', $hashedValue);
-        $salt = substr($salt, 0, self::BCRYPT_SALT_CHARS);
+        [, , $rounds, $hash] = explode('$', $hashedValue);
+        $salt = substr($hash, 0, self::BCRYPT_SALT_CHARS);
 
         $options = array_merge($options, [
             'salt' => $salt,
             'rounds' => (int) $rounds,
         ]);
+
         return hash_equals(
-            $this->make($value, $options),
+            $this->hash($value, $options),
             $hashedValue
         );
     }
@@ -274,7 +284,9 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     protected function salt(array $options = []) : string
     {
-        $salt = $options['salt'] ?? $this->salt;
+        $salt = $options['salt'] ?? Radix64::encode(
+            random_bytes(self::BCRYPT_SALT_BYTES)
+        );
 
         if (strlen($salt) !== self::BCRYPT_SALT_CHARS) {
             throw new RuntimeException('Salt should be ' . self::BCRYPT_SALT_CHARS . ' chars long');
