@@ -82,8 +82,10 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
             return $info;
         }
 
+        [,$algoId, $rounds, $hash] = $settings;
+
         // Bcrypt ID should match
-        if ($settings[1] !== self::BCRYPT_ID) {
+        if ($algoId !== self::BCRYPT_ID) {
             return $info;
         }
 
@@ -92,16 +94,17 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         // which can have up to 3 padding '=' chars
         $maxLength = self::BCRYPT_SALT_CHARS + self::POST_HASH_LENGTH;
         if (
-            strlen($settings[3]) < $maxLength - 3 ||
-            strlen($settings[3]) > $maxLength
+            strlen($hash) < $maxLength - 3 ||
+            strlen($hash) > $maxLength
         ) {
             return $info;
         }
 
+        // Follow the format of password_get_info() array
         $info['algo'] = self::BCRYPT_ID;
         $info['algoName'] = self::ALGO_NAME;
-        if (isset($settings[2]) && is_numeric($settings[2])) {
-            $info['options']['cost'] = (int) $settings[2];
+        if (is_numeric($rounds)) {
+            $info['options']['cost'] = (int) $rounds;
         }
 
         return $info;
