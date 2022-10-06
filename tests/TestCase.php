@@ -305,4 +305,16 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $hash = Hash::make($pass, ['salt' => $salt]);
         $this->assertFalse(strpos($hash, $salt));
     }
+
+    public function test_empty_config_uses_valid_default_options()
+    {
+        $this->app['config']->set('hashing.hmac-bcrypt', null);
+
+        // Pepper is needed
+        $this->app['config']->set('hashing.hmac-bcrypt.pepper', Str::random());
+        $pass = Str::random();
+        $hash = Hash::make($pass);
+
+        $this->assertTrue(Hash::check($pass, $hash));
+    }
 }
