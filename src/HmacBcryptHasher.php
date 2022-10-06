@@ -15,6 +15,11 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     protected const POST_HASH_LENGTH = 88;
 
     /**
+     * A string for mapping an int to the corresponding radix 64 character.
+     */
+    public const ITOA64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
      * A 16 bytes string radix64-encoded will be 22 chars
      */
     public const BCRYPT_SALT_CHARS = 22;
@@ -287,7 +292,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      */
     protected function salt(array $options = []) : string
     {
-        $salt = $options['salt'] ?? Radix64::encode(
+        $salt = $options['salt'] ?? $this->radix64Encode(
             random_bytes(self::BCRYPT_SALT_BYTES)
         );
 
@@ -327,5 +332,41 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     protected function pepper(array $options = []) : string
     {
         return $options['pepper'] ?? $this->pepper;
+    }
+
+    /**
+     * This function was derived from the Portable PHP password hashing framework
+     * (phpass), written by Solar Designer <solar at openwall.com> in 2004-2006
+     * and placed in the public domain.
+     * @param string $input
+     * @return string
+     */
+    private function radix64Encode(string $input) : string
+    {
+        $output = '';
+        $i = 0;
+
+        do {
+            $c1 = ord($input[$i++]);
+            $output .= self::ITOA64[$c1 >> 2];
+            $c1 = ($c1 & 0x03) << 4;
+
+            if ($i >= self::BCRYPT_SALT_BYTES) {
+                $output .= self::ITOA64[$c1];
+                break;
+            }
+
+            $c2 = ord($input[$i++]);
+            $c1 |= $c2 >> 4;
+            $output .= self::ITOA64[$c1];
+            $c1 = ($c2 & 0x0f) << 2;
+
+            $c2 = ord($input[$i++]);
+            $c1 |= $c2 >> 6;
+            $output .= self::ITOA64[$c1];
+            $output .= self::ITOA64[$c2 & 0x3f];
+        } while (1);
+
+        return $output;
     }
 }
