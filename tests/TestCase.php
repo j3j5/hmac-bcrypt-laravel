@@ -5,9 +5,10 @@ namespace j3j5\HmacBcryptLaravel\Tests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use j3j5\HmacBcryptLaravel\HmacBcryptHasher;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RuntimeException;
 
-class TestCase extends \Orchestra\Testbench\TestCase
+class TestCase extends OrchestraTestCase
 {
     /**
      * Get package providers.
@@ -240,10 +241,10 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->assertNotEmpty($hashDefaultRounds, $hashDifferentRounds);
 
-        [, , $outputCostDefault,] = explode('$', $hashDefaultRounds);
+        [, , $outputCostDefault] = explode('$', $hashDefaultRounds);
         $this->assertEquals($defaultRounds, $outputCostDefault);
 
-        [, , $outputCostDifferent,] = explode('$', $hashDifferentRounds);
+        [, , $outputCostDifferent] = explode('$', $hashDifferentRounds);
         $this->assertEquals($defaultRounds - 1, $outputCostDifferent);
 
         // No matter what cost (rounds) is defined on the hasher, the check function
