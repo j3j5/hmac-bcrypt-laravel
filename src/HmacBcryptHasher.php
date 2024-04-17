@@ -32,20 +32,20 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      *
      * @var bool
      */
-    protected $verifyAlgorithm = false;
+    protected bool $verifyAlgorithm = false;
 
     /**
      * The default cost factor.
      *
      * @var int
      */
-    protected $rounds = 13;
+    protected int $rounds = 13;
 
     /**
      * The pepper to be applied on the hmac steps
      * @var string
      */
-    protected $pepper;
+    protected string $pepper;
 
     /**
      * Create a new hasher instance.
@@ -59,7 +59,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
         $this->rounds = $options['rounds'] ?? $this->rounds;
 
         $this->pepper = $options['pepper'] ?? '';
-        if ($this->pepper === '' || !is_string($this->pepper)) {
+        if ($this->pepper === '') {
             throw new RuntimeException("HMAC-Bcrypt can't work without pepper and is currently empty.");
         }
     }
@@ -70,7 +70,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param  string  $hashedValue
      * @return array{algo:null|int|string, algoName:string, options:array{cost?:int, salt?: string, memory_cost?: int, time_cost?: int, threads?: int}}
      */
-    public function info($hashedValue)
+    public function info($hashedValue) : array
     {
         // Try first the parent
         /** @var array{algo:null|int|string, algoName:string, options:array{cost?:int, salt?: string, memory_cost?: int, time_cost?: int, threads?: int}} $info */
@@ -124,7 +124,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @return string
      *
      */
-    public function make($value, array $options = [])
+    public function make($value, array $options = []) : string
     {
         // Make sure no salt is passed ever on make()
         // Ignore phpstan error so it's not documented that salt could be passed
@@ -142,7 +142,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @return string
      *
      */
-    private function hash($value, array $options = [])
+    private function hash($value, array $options = []) : string
     {
         $settings = sprintf(
             '$%2s$%02d$%s',
@@ -194,7 +194,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @return bool
      *
      */
-    public function check($value, $hashedValue, array $options = [])
+    public function check($value, $hashedValue, array $options = []) : bool
     {
         $algoName = $this->info($hashedValue)['algoName'];
         if ($algoName !== self::ALGO_NAME) {
@@ -226,7 +226,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param  array{rounds?: int, salt?: string, pepper?: string} $options  $options
      * @return bool
      */
-    public function needsRehash($hashedValue, array $options = [])
+    public function needsRehash($hashedValue, array $options = []) : bool
     {
         $info = $this->info($hashedValue);
 
