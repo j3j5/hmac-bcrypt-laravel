@@ -260,6 +260,48 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
     }
 
     /**
+     * Verifies that the configuration is less than or equal to what is configured.
+     *
+     * @internal
+     */
+    public function verifyConfiguration($value)
+    {
+        return $this->isUsingCorrectAlgorithm($value) && $this->isUsingValidOptions($value);
+    }
+
+    /**
+     * Verify the hashed value's algorithm.
+     *
+     * @param  string  $hashedValue
+     * @return bool
+     */
+    protected function isUsingCorrectAlgorithm($hashedValue)
+    {
+        return $this->info($hashedValue)['algoName'] === self::ALGO_NAME;
+    }
+
+    /**
+     * Verify the hashed value's options.
+     *
+     * @param  string  $hashedValue
+     * @return bool
+     */
+    protected function isUsingValidOptions($hashedValue)
+    {
+        ['options' => $options] = $this->info($hashedValue);
+
+        if (!is_int($options['cost'] ?? null)) {
+            return false;
+        }
+
+        if ($options['cost'] > $this->rounds) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Extract the cost value from the options array.
      *
      * The two digit cost parameter is the base-2 logarithm of the iteration
