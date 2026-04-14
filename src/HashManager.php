@@ -18,6 +18,6 @@ class HashManager extends Manager implements Hasher
         if (!is_array($options)) {
             $options = [];
         }
-        return new HmacBcryptHasher($options);
+        return new HmacBcryptHasher($options);  // @phpstan-ignore argument.type (there's validation on the constructor)
     }
 }

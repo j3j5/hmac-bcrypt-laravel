@@ -83,7 +83,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
 
         // Try "manually" for our algo
         $settings = explode('$', $hashedValue);
-        if (!is_array($settings) || count($settings) !== 4) {
+        if (count($settings) !== 4) {
             return $info;
         }
 
@@ -261,10 +261,11 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
 
     /**
      * Verifies that the configuration is less than or equal to what is configured.
-     *
      * @internal
+     *
+     * @param  string  $value
      */
-    public function verifyConfiguration($value)
+    public function verifyConfiguration($value): bool
     {
         return $this->isUsingCorrectAlgorithm($value) && $this->isUsingValidOptions($value);
     }
@@ -275,7 +276,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param  string  $hashedValue
      * @return bool
      */
-    protected function isUsingCorrectAlgorithm($hashedValue)
+    protected function isUsingCorrectAlgorithm($hashedValue): bool
     {
         return $this->info($hashedValue)['algoName'] === self::ALGO_NAME;
     }
@@ -286,7 +287,7 @@ class HmacBcryptHasher extends AbstractHasher implements HasherContract
      * @param  string  $hashedValue
      * @return bool
      */
-    protected function isUsingValidOptions($hashedValue)
+    protected function isUsingValidOptions($hashedValue): bool
     {
         ['options' => $options] = $this->info($hashedValue);
 
